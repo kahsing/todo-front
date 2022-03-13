@@ -13,10 +13,14 @@ const Listing = ({ initial_todos }) => {
   const [editMode, setEditMode] = useState(false);
   const [editData, setEditData] = useState(false);
   const [errorMessage, setErrorMessage] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   const inputClasses =
     "w-full bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 ";
+
+  useEffect(async () => {
+    setToDos(await MongoApi.getItemList());
+  }, []);
 
   useEffect(() => {
     setLoading(false);
@@ -321,7 +325,7 @@ const Listing = ({ initial_todos }) => {
 };
 
 export async function getStaticProps() {
-  let initial_todos = await MongoApi.getItemList();
+  let initial_todos = [];
 
   return {
     props: {
