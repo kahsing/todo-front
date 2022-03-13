@@ -1,8 +1,6 @@
 import axios from "axios";
-const SERVER_URL = process.env.SERVER_URL;
-const PORT = process.env.PORT;
 
-const url = SERVER_URL + ":" + PORT;
+const url = process.env.SERVER_URL;
 
 var MongoApi = {
   getItemList: async function () {
