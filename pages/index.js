@@ -20,7 +20,12 @@ const Listing = ({ initial_todos }) => {
 
   useEffect(() => {
     setLoading(false);
+    setErrorMessage(false);
   }, [todos]);
+
+  useEffect(() => {
+    setLoading(false);
+  }, [errorMessage]);
 
   const addItem = async () => {
     const newTodo = {
@@ -28,11 +33,11 @@ const Listing = ({ initial_todos }) => {
       desc: data,
       done: false,
     };
-    setTarget(newTodo);
     setLoading(true);
 
     const res = await MongoApi.addItem(newTodo, setErrorMessage);
     if (res) {
+      setTarget(newTodo);
       setToDos([newTodo, ...todos]);
       setAction("ADD");
     } else {
@@ -43,11 +48,11 @@ const Listing = ({ initial_todos }) => {
 
   const removeItem = async (toRemove) => {
     const changedTodos = todos.filter((todo) => todo.uid !== toRemove.uid);
-    setTarget(toRemove);
     setLoading(true);
 
     const res = await MongoApi.removeItem(toRemove, setErrorMessage);
     if (res) {
+      setTarget(toRemove);
       setToDos(changedTodos);
       setAction("REMOVE");
     } else {
@@ -75,11 +80,11 @@ const Listing = ({ initial_todos }) => {
     });
 
     if (toSaveEditItem) {
-      setTarget(toSaveEditItem);
       setLoading(true);
-      const res = await MongoApi.saveEditItem(toSaveEditItem, setErrorMessage);
 
+      const res = await MongoApi.saveEditItem(toSaveEditItem, setErrorMessage);
       if (res) {
+        setTarget(toSaveEditItem);
         setAction("EDIT");
         setToDos(changedTodos);
       } else {
@@ -93,7 +98,6 @@ const Listing = ({ initial_todos }) => {
     let toEditItem = null;
     const changedTodos = todos.map((item) => {
       if (item.uid == uid) {
-        !item.done ? setAction("COMPLETE") : setAction("INCOMPLETE");
         toEditItem = {
           ...item,
           done: !item.done,
@@ -102,15 +106,19 @@ const Listing = ({ initial_todos }) => {
       }
       return item;
     });
-    setTarget(toEditItem);
-    setLoading(true);
 
-    const res = await MongoApi.saveEditItem(toEditItem, setErrorMessage);
-    if (res) {
-      setToDos(changedTodos);
-    } else {
-      setAction("ERROR");
-      setTarget(false);
+    if (toEditItem) {
+      setLoading(true);
+
+      const res = await MongoApi.saveEditItem(toEditItem, setErrorMessage);
+      if (res) {
+        setTarget(toEditItem);
+        toEditItem.done ? setAction("COMPLETE") : setAction("INCOMPLETE");
+        setToDos(changedTodos);
+      } else {
+        setAction("ERROR");
+        setTarget(false);
+      }
     }
 
     setEditMode(false);
